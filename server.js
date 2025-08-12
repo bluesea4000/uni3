@@ -520,8 +520,5 @@ async function generatePathCoordinates(center, distance) {
 
 // 서버 시작
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 서버가 포트 ${PORT}에서 실행 중입니다.`);
-    console.log(`🌐 환경: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`🔑 OpenAI API 키: ${process.env.OPENAI_API_KEY ? '설정됨' : '설정되지 않음'}`);
-    console.log(`🗺️  카카오맵 API 키: ${process.env.KAKAO_REST_API_KEY ? '설정됨' : '설정되지 않음'}`);
+    console.log(`🚀 서버 시작됨 - 포트: ${PORT}, 환경: ${process.env.NODE_ENV || 'development'}`);
 });
