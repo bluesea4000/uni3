@@ -15,7 +15,12 @@ const COURSES_FILE = path.join(DATA_DIR, 'courses.json');
 const KAKAO_REST_API_KEY = process.env.KAKAO_REST_API_KEY || 'YOUR_KAKAO_REST_API_KEY';
 
 // 미들웨어 설정
-app.use(cors());
+app.use(cors({
+    origin: process.env.NODE_ENV === 'production' 
+        ? ['https://2025-unithon-main-production.up.railway.app', 'https://2025-unithon-main.railway.app']
+        : true,
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '/')));
 

@@ -4,6 +4,7 @@ GPT API와 카카오맵 API를 활용한 맞춤형 러닝 코스 생성기입니
 
 ## 🚀 배포된 사이트
 
+**Railway 배포**: [러닝 코스 생성기](https://2025-unithon-main-production.up.railway.app) (권장)
 **Vercel 배포**: [러닝 코스 생성기](https://running-course-generator.vercel.app)
 
 ## 📋 기능
@@ -49,7 +50,32 @@ npm run dev
 
 ### 배포
 
-이 프로젝트는 Vercel을 통해 자동 배포됩니다.
+이 프로젝트는 Railway를 통해 자동 배포됩니다 (권장).
+
+#### Railway 배포 방법
+
+1. **Railway 계정 생성**
+   - [Railway.app](https://railway.app/)에 접속
+   - GitHub 계정으로 로그인
+
+2. **프로젝트 연결**
+   - **New Project** → **Deploy from GitHub repo** 선택
+   - `2025UNithon-main` 저장소 선택
+
+3. **환경변수 설정**
+   - Railway 대시보드에서 **Variables** 탭 선택
+   - 다음 환경변수 추가:
+     - `OPENAI_API_KEY`: OpenAI API 키
+     - `KAKAO_REST_API_KEY`: 카카오맵 REST API 키
+     - `NODE_ENV`: production
+
+4. **자동 배포**
+   - GitHub에 푸시하면 자동으로 배포됨
+   - 배포 완료 후 제공되는 도메인으로 접속
+
+#### Vercel 배포 (대안)
+
+이 프로젝트는 Vercel을 통해도 배포할 수 있습니다.
 
 ## 🔑 API 키 설정
 
