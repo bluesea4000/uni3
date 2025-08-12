@@ -158,21 +158,39 @@ app.post('/api/generate-course', async (req, res) => {
             courseData.path = generatePathCoordinates(coordinates, formData.distance);
         }
         
-        //courseData.waypoints = courseData.waypoints.map(wp => wp.name || wp);
-        //res.json(courseData);
-        courseData.course.waypoints = courseData.course.waypoints.map(wp => ({
-          name: wp.name || "",
-          location: {
-            latitude: wp.location?.latitude || 0,
-            longitude: wp.location?.longitude || 0,
-          }
-        }));
+        console.log('--- GPT 응답 데이터 정규화 시작 ---');
+        console.log('원본 courseData:', JSON.stringify(courseData, null, 2));
+        
+        // 안전한 데이터 정규화
+        try {
+            if (courseData.course && courseData.course.waypoints) {
+                courseData.course.waypoints = courseData.course.waypoints.map(wp => ({
+                    name: wp.name || "",
+                    location: {
+                        latitude: wp.location?.latitude || 0,
+                        longitude: wp.location?.longitude || 0,
+                    }
+                }));
+                console.log('✅ waypoints 정규화 완료');
+            } else {
+                console.log('⚠️  waypoints 데이터가 없거나 잘못된 형식');
+            }
+        } catch (waypointError) {
+            console.error('❌ waypoints 정규화 오류:', waypointError);
+        }
 
         // 값 정규화(필드명 변형 및 기본값 보정)
+        console.log('--- 값 정규화 시작 ---');
         const src = courseData.course || {};
+        
         const toNumber = (v, fallback = 0) => {
-          const n = typeof v === 'number' ? v : parseFloat(String(v||'').replace(/[^0-9.+-]/g,''));
-          return isNaN(n) ? fallback : n;
+          try {
+            const n = typeof v === 'number' ? v : parseFloat(String(v||'').replace(/[^0-9.+-]/g,''));
+            return isNaN(n) ? fallback : n;
+          } catch (error) {
+            console.warn('⚠️  숫자 변환 오류:', error, '값:', v);
+            return fallback;
+          }
         };
 
         const total_distance_km = (src.total_distance_km !== undefined)
@@ -195,21 +213,34 @@ app.post('/api/generate-course', async (req, res) => {
         const difficultyKorean = src.difficulty || difficultyToKorean(formData.difficulty);
         const emotional_recommendation = src.emotional_recommendation || src.emotion || "";
 
-        const formattedCourseData = {
-          course: {
-            description: src.description || "",
-            waypoints: src.waypoints,
-            running_tips: Array.isArray(src.running_tips) ? src.running_tips : [],
-            total_distance_km,
-            expected_duration_minutes,
-            elevation_change_meters,
-            emotional_recommendation,
-            difficulty: difficultyKorean,
-            path: src.path,
-          }
-        };
-
-        res.json(formattedCourseData);
+        console.log('--- 최종 데이터 포맷팅 시작 ---');
+        
+        try {
+            const formattedCourseData = {
+                course: {
+                    description: src.description || "",
+                    waypoints: src.waypoints || [],
+                    running_tips: Array.isArray(src.running_tips) ? src.running_tips : [],
+                    total_distance_km,
+                    expected_duration_minutes,
+                    elevation_change_meters,
+                    emotional_recommendation,
+                    difficulty: difficultyKorean,
+                    path: src.path || [],
+                }
+            };
+            
+            console.log('✅ 최종 데이터 포맷팅 완료:', JSON.stringify(formattedCourseData, null, 2));
+            res.json(formattedCourseData);
+            
+        } catch (formatError) {
+            console.error('❌ 데이터 포맷팅 오류:', formatError);
+            res.status(500).json({ 
+                error: '데이터 포맷팅 중 오류가 발생했습니다.', 
+                detail: formatError.message,
+                timestamp: new Date().toISOString()
+            });
+        }
 
 
     } catch (error) {
