@@ -96,12 +96,11 @@ app.post('/api/generate-course', async (req, res) => {
         const kakaoApiKey = process.env.KAKAO_REST_API_KEY;
         console.log(`--- 카카오 API 키 로드: ${kakaoApiKey ? '성공 (키의 일부: ' + kakaoApiKey.substring(0, 4) + '...)' : '실패'} ---`);
 
-        if (kakaoApiKey )//&& courseData.course.waypoints && courseData.course.waypoints.length > 1 && courseData.course.waypoints[0].location.latitude) {
-        {
+        if (kakaoApiKey && courseData.course.waypoints && courseData.course.waypoints.length > 1 && courseData.course.waypoints[0].location.latitude) {
+            try {
             console.log('--- 카카오맵 경로 탐색 시작 ---');
             const origin = `${courseData.course.waypoints[0].location.longitude},${courseData.course.waypoints[0].location.latitude}`;
-            const destination = `${courseData.course.waypoints[courseData.course.waypoints.length - 1].location.longitude},
-                                    ${courseData.course.waypoints[courseData.course.waypoints.length - 1].location.latitude}`;
+            const destination = `${courseData.course.waypoints[courseData.course.waypoints.length - 1].location.longitude},${courseData.course.waypoints[courseData.course.waypoints.length - 1].location.latitude}`;
             //const waypointsStr = courseData.course.waypoints.slice(1, -1).map(wp => `${wp.lng},${wp.lat}`).join('|');
 
             const waypointsArr = courseData.course.waypoints.slice(1, -1);
@@ -118,44 +117,39 @@ app.post('/api/generate-course', async (req, res) => {
                 params.waypoints = waypointsStr;
             }
 
-            const kakaoResponse = await axios.get('https://apis-navi.kakaomobility.com/v1/directions', {
-                params,
-                headers: { 
-                    Authorization: `KakaoAK ${kakaoApiKey}`,
-                    'KA': 'sdk/1.0 os/javascript sdkver/1.0 app/ver/1.0',
-                    'os': 'web',
-                    'origin': 'https://2025-unithon-main-production.up.railway.app'
-                }
-            });
+                            console.log('카카오맵 API 요청 파라미터:', params);
 
-/*
-            console.log("waypointsStr",waypointsStr );
-            const kakaoResponse = await axios.get('https://apis-navi.kakaomobility.com/v1/directions', {
-                params: { origin, destination, waypoints: waypointsStr, priority: 'RECOMMEND' },
-                headers: { 
-                    Authorization: `KakaoAK ${kakaoApiKey}`,
-                    'KA': 'sdk/1.0 os/javascript sdkver/1.0 app/ver/1.0',
-                    'os': 'web',
-                    'origin': 'https://2025-unithon-main-production.up.railway.app'
-                }
-            });
-*/
-            const route = kakaoResponse.data.routes[0];
-            if (route && route.sections) {
-                const linePath = [];
-                route.sections.forEach(section => {
-                    section.roads.forEach(road => {
-                        for (let i = 0; i < road.vertexes.length; i += 2) {
-                            linePath.push({ lat: road.vertexes[i + 1], lng: road.vertexes[i] });
-                        }
-                    });
+                const kakaoResponse = await axios.get('https://apis-navi.kakaomobility.com/v1/directions', {
+                    params,
+                    headers: { 
+                        Authorization: `KakaoAK ${kakaoApiKey}`,
+                        'KA': 'sdk/1.0 os/javascript sdkver/1.0 app/ver/1.0',
+                        'os': 'web',
+                        'origin': 'https://2025-unithon-main-production.up.railway.app'
+                    }
                 });
-                courseData.course.path = linePath;
-                console.log(`--- 카카오맵 경로 탐색 성공: ${linePath.length}개의 좌표 발견 ---`);
+
+                const route = kakaoResponse.data.routes[0];
+                if (route && route.sections) {
+                    const linePath = [];
+                    route.sections.forEach(section => {
+                        section.roads.forEach(road => {
+                            for (let i = 0; i < road.vertexes.length; i += 2) {
+                                linePath.push({ lat: road.vertexes[i + 1], lng: road.vertexes[i] });
+                            }
+                        });
+                    });
+                    courseData.course.path = linePath;
+                    console.log(`--- 카카오맵 경로 탐색 성공: ${linePath.length}개의 좌표 발견 ---`);
+                }
+            } catch (kakaoError) {
+                console.error('❌ 카카오맵 API 오류:', kakaoError.response?.data || kakaoError.message);
+                console.log('--- 카카오맵 경로 탐색 실패, 기본 경로 생성 ---');
+                courseData.course.path = await generatePathCoordinates(coordinates, formData.distance);
             }
         } else {
             console.log('--- 카카오맵 경로 탐색 건너뜀 (조건 불충족) ---');
-            courseData.path = generatePathCoordinates(coordinates, formData.distance);
+            courseData.course.path = await generatePathCoordinates(coordinates, formData.distance);
         }
         
         console.log('--- GPT 응답 데이터 정규화 시작 ---');
