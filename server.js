@@ -14,6 +14,20 @@ const DATA_DIR = path.join(__dirname, 'data');
 const COURSES_FILE = path.join(DATA_DIR, 'courses.json');
 const KAKAO_REST_API_KEY = process.env.KAKAO_REST_API_KEY || 'YOUR_KAKAO_REST_API_KEY';
 
+// 환경변수 검증
+app.use((req, res, next) => {
+    if (req.path === '/health') {
+        return res.json({
+            status: 'OK',
+            port: process.env.PORT,
+            environment: process.env.NODE_ENV,
+            openai_key: process.env.OPENAI_API_KEY ? '설정됨' : '설정되지 않음',
+            kakao_key: process.env.KAKAO_REST_API_KEY ? '설정됨' : '설정되지 않음'
+        });
+    }
+    next();
+});
+
 // 미들웨어 설정
 app.use(cors({
     origin: process.env.NODE_ENV === 'production' 
@@ -471,6 +485,9 @@ async function generatePathCoordinates(center, distance) {
 }
 
 // 서버 시작
-app.listen(PORT, () => {
-    console.log(`서버가 http://localhost:${PORT} 에서 실행 중입니다.`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 서버가 포트 ${PORT}에서 실행 중입니다.`);
+    console.log(`🌐 환경: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🔑 OpenAI API 키: ${process.env.OPENAI_API_KEY ? '설정됨' : '설정되지 않음'}`);
+    console.log(`🗺️  카카오맵 API 키: ${process.env.KAKAO_REST_API_KEY ? '설정됨' : '설정되지 않음'}`);
 });
