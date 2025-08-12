@@ -48,8 +48,22 @@ app.post('/api/generate-course', async (req, res) => {
     try {
         const { formData, coordinates } = req.body;
         const apiKey = process.env.OPENAI_API_KEY;
+        console.log('🔑 OpenAI API 키 확인:', apiKey ? `설정됨 (${apiKey.substring(0, 10)}...)` : '설정되지 않음');
+        
         if (!apiKey) {
-            return res.status(500).json({ error: 'OpenAI API 키가 설정되지 않았습니다.' });
+            console.error('❌ OpenAI API 키가 설정되지 않았습니다.');
+            return res.status(500).json({ 
+                error: 'OpenAI API 키가 설정되지 않았습니다.',
+                detail: 'Railway 환경변수에서 OPENAI_API_KEY를 설정해주세요.'
+            });
+        }
+        
+        if (apiKey === 'your_openai_api_key_here' || apiKey === 'YOUR_OPENAI_API_KEY') {
+            console.error('❌ OpenAI API 키가 기본값으로 설정되어 있습니다.');
+            return res.status(500).json({ 
+                error: 'OpenAI API 키가 기본값으로 설정되어 있습니다.',
+                detail: '실제 OpenAI API 키로 교체해주세요.'
+            });
         }
 
         console.log('--- OpenAI API 요청 시작 ---');
@@ -194,8 +208,20 @@ app.post('/api/generate-course', async (req, res) => {
     } catch (error) {
         const status = error?.response?.status;
         const message = error?.response?.data?.error?.message || error?.message;
-        console.error('API 오류 발생:', { status, message, data: error?.response?.data });
-        res.status(500).json({ error: '코스 생성 중 오류가 발생했습니다.', detail: message });
+        const stack = error?.stack;
+        
+        console.error('🚨 API 오류 발생 상세 정보:');
+        console.error('Status:', status);
+        console.error('Message:', message);
+        console.error('Stack:', stack);
+        console.error('Full Error:', error);
+        
+        res.status(500).json({ 
+            error: '코스 생성 중 오류가 발생했습니다.', 
+            detail: message,
+            timestamp: new Date().toISOString(),
+            path: '/api/generate-course'
+        });
     }
 });
 
