@@ -53,15 +53,52 @@ npm run dev
 
 ## 🔑 API 키 설정
 
-### OpenAI API 키
-1. [OpenAI](https://platform.openai.com/)에서 API 키 발급
-2. Vercel 대시보드에서 환경 변수 설정:
-   - `OPENAI_API_KEY`: 발급받은 API 키
+### 로컬 개발 환경
 
-### 카카오맵 API 키 (선택사항)
-1. [카카오 개발자](https://developers.kakao.com/)에서 API 키 발급
-2. Vercel 대시보드에서 환경 변수 설정:
-   - `KAKAO_API_KEY`: 발급받은 API 키
+1. 프로젝트 루트에 `.env` 파일 생성
+2. 다음 내용을 입력하고 실제 API 키로 교체:
+
+```bash
+# OpenAI API 설정
+OPENAI_API_KEY=your_openai_api_key_here
+
+# 카카오맵 API 설정
+KAKAO_REST_API_KEY=your_kakao_rest_api_key_here
+
+# 서버 포트 설정 (선택사항)
+PORT=3000
+
+# 환경 설정
+NODE_ENV=development
+```
+
+### Vercel 배포 환경
+
+1. [Vercel 대시보드](https://vercel.com/dashboard)에서 프로젝트 선택
+2. Settings → Environment Variables 메뉴로 이동
+3. 다음 환경변수 추가:
+
+#### OpenAI API 키
+- **Name**: `OPENAI_API_KEY`
+- **Value**: 발급받은 OpenAI API 키
+- **Environment**: Production, Preview, Development 모두 선택
+
+#### 카카오맵 API 키
+- **Name**: `KAKAO_REST_API_KEY`
+- **Value**: 발급받은 카카오 REST API 키
+- **Environment**: Production, Preview, Development 모두 선택
+
+### API 키 발급 방법
+
+#### OpenAI API 키
+1. [OpenAI Platform](https://platform.openai.com/)에서 계정 생성/로그인
+2. API Keys 메뉴에서 "Create new secret key" 클릭
+3. API 키 복사하여 환경변수에 설정
+
+#### 카카오맵 API 키
+1. [카카오 개발자](https://developers.kakao.com/)에서 계정 생성/로그인
+2. 애플리케이션 생성 후 "플랫폼" → "Web" 등록
+3. "앱 키" → "REST API 키" 복사하여 환경변수에 설정
 
 ## 📱 사용법
 
