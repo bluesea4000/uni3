@@ -68,7 +68,11 @@ app.post('/api/generate-course', async (req, res) => {
         }
 
         console.log('--- OpenAI API 요청 시작 ---');
+        console.log('🔑 API 키 상태:', apiKey ? `설정됨 (${apiKey.substring(0, 10)}...)` : '설정되지 않음');
+        
         const prompt = generatePrompt(formData, coordinates);
+        console.log('📝 프롬프트 길이:', prompt.length, '자');
+        
         const response = await axios.post(
             'https://api.openai.com/v1/chat/completions',
             {
