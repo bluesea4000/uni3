@@ -13,6 +13,7 @@ const OPENAI_MODEL = 'gpt-4o-search-preview';
 const DATA_DIR = path.join(__dirname, 'data');
 const COURSES_FILE = path.join(DATA_DIR, 'courses.json');
 const KAKAO_REST_API_KEY = process.env.KAKAO_REST_API_KEY || 'YOUR_KAKAO_REST_API_KEY';
+const APP_DOMAIN = process.env.APP_DOMAIN || 'https://2025-unithon-main-production.up.railway.app';
 
 // 환경변수 검증
 app.use((req, res, next) => {
@@ -31,7 +32,7 @@ app.use((req, res, next) => {
 // 미들웨어 설정
 app.use(cors({
     origin: process.env.NODE_ENV === 'production' 
-        ? ['https://2025-unithon-main-production.up.railway.app', 'https://2025-unithon-main.railway.app']
+        ? [APP_DOMAIN, 'https://2025-unithon-main.railway.app']
         : true,
     credentials: true
 }));
@@ -116,20 +117,22 @@ app.post('/api/generate-course', async (req, res) => {
             const kakaoResponse = await axios.get('https://apis-navi.kakaomobility.com/v1/directions', {
                 params,
                 headers: { 
-                Authorization: `KakaoAK ${kakaoApiKey}`,
-                os: 'windows',
-                origin: 'localhost'
-            }
-        });
+                    Authorization: `KakaoAK ${kakaoApiKey}`,
+                    'KA': 'sdk/1.0 os/javascript sdkver/1.0 app/ver/1.0',
+                    'os': 'web',
+                    'origin': 'https://2025-unithon-main-production.up.railway.app'
+                }
+            });
 
 /*
             console.log("waypointsStr",waypointsStr );
             const kakaoResponse = await axios.get('https://apis-navi.kakaomobility.com/v1/directions', {
                 params: { origin, destination, waypoints: waypointsStr, priority: 'RECOMMEND' },
-                 headers: { 
-                            Authorization: `KakaoAK ${kakaoApiKey}`,
-                            os: 'windows',
-                            origin: 'localhost'
+                headers: { 
+                    Authorization: `KakaoAK ${kakaoApiKey}`,
+                    'KA': 'sdk/1.0 os/javascript sdkver/1.0 app/ver/1.0',
+                    'os': 'web',
+                    'origin': 'https://2025-unithon-main-production.up.railway.app'
                 }
             });
 */
@@ -235,7 +238,12 @@ app.get('/api/road-path', async (req, res) => {
         const [originLng, originLat] = origin.split(',');
         const [destLng, destLat] = destination.split(',');
         const response = await axios.get(url, {
-            headers: { Authorization: `KakaoAK ${KAKAO_REST_API_KEY}` },
+            headers: { 
+                Authorization: `KakaoAK ${KAKAO_REST_API_KEY}`,
+                'KA': 'sdk/1.0 os/javascript sdkver/1.0 app/ver/1.0',
+                'os': 'web',
+                'origin': 'https://2025-unithon-main-production.up.railway.app'
+            },
             params: {
                 origin: `${originLng},${originLat}`,
                 destination: `${destLng},${destLat}`,
